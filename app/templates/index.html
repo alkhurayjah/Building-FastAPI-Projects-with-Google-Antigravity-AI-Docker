@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Titanic Survival Predictor</title>
+    <meta name="description" content="Predict Titanic passenger survival using a machine learning model. Enter passenger details and get an instant prediction." />
+
+    <!-- Google Fonts – Inter for a clean modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ── CSS Reset & Variables ─────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0f172a;
+            --surface:   #1e293b;
+            --card:      #334155;
+            --border:    #475569;
+            --text:      #f1f5f9;
+            --text-dim:  #94a3b8;
+            --accent:    #38bdf8;
+            --accent-h:  #7dd3fc;
+            --success:   #4ade80;
+            --danger:    #f87171;
+            --radius:    12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        /* ── Header ───────────────────────────────────────────── */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        header p {
+            color: var(--text-dim);
+            margin-top: .5rem;
+            font-size: 0.95rem;
+        }
+
+        /* ── Card ─────────────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.35);
+        }
+
+        /* ── Form Grid ────────────────────────────────────────── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.1rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.35rem;
+        }
+        input, select {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 0.65rem 0.85rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        }
+
+        /* ── Button ───────────────────────────────────────────── */
+        .btn {
+            margin-top: 1.4rem;
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            color: #fff;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ── Result Box ───────────────────────────────────────── */
+        .result {
+            margin-top: 1.4rem;
+            padding: 1.2rem;
+            border-radius: var(--radius);
+            display: none;                /* hidden until prediction */
+            text-align: center;
+            animation: fadeIn 0.4s ease;
+        }
+        .result.survived {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--success);
+        }
+        .result.not-survived {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--danger);
+        }
+        .result .icon { font-size: 2.2rem; }
+        .result .label {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: .4rem;
+        }
+        .result .prob {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-top: .25rem;
+        }
+
+        /* ── Error Box ────────────────────────────────────────── */
+        .error {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        /* ── Footer ───────────────────────────────────────────── */
+        footer {
+            margin-top: 2rem;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Page Header -->
+    <header>
+        <h1>🚢 Titanic Survival Predictor</h1>
+        <p>Enter passenger details below to predict survival likelihood</p>
+    </header>
+
+    <!-- Main Prediction Card -->
+    <div class="card">
+        <form id="prediction-form">
+            <div class="form-grid">
+                <!-- Ticket Class -->
+                <div class="form-group">
+                    <label for="Pclass">Ticket Class</label>
+                    <select id="Pclass" name="Pclass" required>
+                        <option value="1">1st Class</option>
+                        <option value="2">2nd Class</option>
+                        <option value="3" selected>3rd Class</option>
+                    </select>
+                </div>
+
+                <!-- Sex -->
+                <div class="form-group">
+                    <label for="Sex">Gender</label>
+                    <select id="Sex" name="Sex" required>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+
+                <!-- Age -->
+                <div class="form-group">
+                    <label for="Age">Age</label>
+                    <input type="number" id="Age" name="Age" min="0" max="120" step="0.5" value="25" required />
+                </div>
+
+                <!-- Fare -->
+                <div class="form-group">
+                    <label for="Fare">Fare ($)</label>
+                    <input type="number" id="Fare" name="Fare" min="0" step="0.01" value="7.25" required />
+                </div>
+
+                <!-- Siblings / Spouses -->
+                <div class="form-group">
+                    <label for="SibSp">Siblings / Spouses</label>
+                    <input type="number" id="SibSp" name="SibSp" min="0" max="10" value="0" required />
+                </div>
+
+                <!-- Parents / Children -->
+                <div class="form-group">
+                    <label for="Parch">Parents / Children</label>
+                    <input type="number" id="Parch" name="Parch" min="0" max="10" value="0" required />
+                </div>
+
+                <!-- Port of Embarkation -->
+                <div class="form-group full-width">
+                    <label for="Embarked">Port of Embarkation</label>
+                    <select id="Embarked" name="Embarked" required>
+                        <option value="S" selected>Southampton (S)</option>
+                        <option value="C">Cherbourg (C)</option>
+                        <option value="Q">Queenstown (Q)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn" id="submit-btn">
+                🔮 Predict Survival
+            </button>
+        </form>
+
+        <!-- Error Display -->
+        <div class="error" id="error-box"></div>
+
+        <!-- Result Display -->
+        <div class="result" id="result-box">
+            <div class="icon" id="result-icon"></div>
+            <div class="label" id="result-label"></div>
+            <div class="prob" id="result-prob"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        Powered by <a href="https://fastapi.tiangolo.com" target="_blank">FastAPI</a> &amp; scikit-learn
+        &middot; <a href="/docs" target="_blank">API Docs</a>
+    </footer>
+
+    <script>
+        // ── Form submission handler ──────────────────────────────
+        const form      = document.getElementById("prediction-form");
+        const resultBox = document.getElementById("result-box");
+        const errorBox  = document.getElementById("error-box");
+        const submitBtn = document.getElementById("submit-btn");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Hide previous results
+            resultBox.style.display = "none";
+            errorBox.style.display  = "none";
+            submitBtn.disabled      = true;
+            submitBtn.textContent   = "Predicting…";
+
+            // Collect form data into a JSON object
+            const payload = {
+                Pclass:   parseInt(document.getElementById("Pclass").value),
+                Sex:      document.getElementById("Sex").value,
+                Age:      parseFloat(document.getElementById("Age").value),
+                SibSp:    parseInt(document.getElementById("SibSp").value),
+                Parch:    parseInt(document.getElementById("Parch").value),
+                Fare:     parseFloat(document.getElementById("Fare").value),
+                Embarked: document.getElementById("Embarked").value,
+            };
+
+            try {
+                // Send POST request to the prediction endpoint
+                const res = await fetch("/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!res.ok) {
+                    // Show validation errors from FastAPI
+                    const err = await res.json();
+                    const msg = err.detail
+                        ? err.detail.map(d => d.msg).join(", ")
+                        : "Unexpected error";
+                    throw new Error(msg);
+                }
+
+                const data = await res.json();
+
+                // Display the result
+                const survived = data.survived;
+                resultBox.className = "result " + (survived ? "survived" : "not-survived");
+                document.getElementById("result-icon").textContent  = survived ? "🎉" : "😔";
+                document.getElementById("result-label").textContent = data.message;
+                document.getElementById("result-prob").textContent  =
+                    `Survival probability: ${(data.probability * 100).toFixed(1)}%`;
+                resultBox.style.display = "block";
+
+            } catch (err) {
+                // Show error to the user
+                errorBox.textContent   = "⚠️ " + err.message;
+                errorBox.style.display = "block";
+            } finally {
+                submitBtn.disabled    = false;
+                submitBtn.textContent = "🔮 Predict Survival";
+            }
+        });
+    </script>
+</body>
+</html>
