@@ -1,0 +1,20 @@
+# docker-compose.yml
+# Run with:  docker compose up --build
+# The application will be available at http://localhost:8000
+
+services:
+  titanic-api:
+    build: .
+    container_name: titanic-prediction-app
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    labels:
+      - "com.docker.desktop.http.port=8000"
+      - "com.docker.desktop.http.path=/"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3

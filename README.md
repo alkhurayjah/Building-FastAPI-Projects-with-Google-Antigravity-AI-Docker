@@ -20,6 +20,8 @@ A machine learning web application that predicts Titanic passenger survival usin
 ├── test_request.py          # Example script to test the API
 ├── requirements.txt         # Python dependencies
 ├── Dockerfile               # Multi-stage Docker build
+├── docker-compose.yml       # One-command Docker Compose setup
+├── start.sh                 # Build, run, and auto-open browser script
 ├── .dockerignore            # Files excluded from Docker context
 └── README.md                # This file
 ```
@@ -63,21 +65,40 @@ python test_request.py
 
 ## 🐳 Docker
 
-### Build the image
+The Dockerfile uses a **multi-stage build**: it trains the model in the first stage and creates a slim runtime image in the second. The container includes a **health check** and **Docker Desktop labels** so it shows an "Open in browser" button automatically.
+
+### Option A — Start script (recommended)
+
+Builds the image, starts the container, and **opens your browser automatically**:
+
+```bash
+./start.sh
+```
+
+### Option B — Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Then open **http://localhost:8000**, or click **"Open in browser"** in Docker Desktop.
+
+### Option C — Docker CLI
 
 ```bash
 docker build -t titanic-fastapi .
-```
-
-The Dockerfile uses a **multi-stage build**: it trains the model in the first stage and creates a slim runtime image in the second.
-
-### Run the container
-
-```bash
 docker run -d -p 8000:8000 --name titanic-app titanic-fastapi
 ```
 
 Open **http://localhost:8000** to use the app.
+
+### Stop the container
+
+```bash
+docker compose down        # if started with Compose / start.sh
+# or
+docker stop titanic-app    # if started with docker run
+```
 
 ---
 

@@ -38,8 +38,21 @@ COPY app/ ./app/
 # Copy the trained model from the builder stage
 COPY --from=builder /build/model/ ./model/
 
+# ── Metadata labels ─────────────────────────────────────────
+# OCI / Docker Desktop labels so the container is recognized
+# as a web service and shows an "Open in browser" button.
+LABEL org.opencontainers.image.title="Titanic Survival Prediction" \
+      org.opencontainers.image.description="FastAPI app that predicts Titanic passenger survival" \
+      org.opencontainers.image.url="http://localhost:8000" \
+      com.docker.desktop.http.port="8000" \
+      com.docker.desktop.http.path="/"
+
 # Expose the default uvicorn port
 EXPOSE 8000
+
+# Health check – Docker marks the container "healthy" once the API responds
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
 # Run the FastAPI app with uvicorn
 # --host 0.0.0.0  → accept connections from any interface (required for Docker)
