@@ -19,16 +19,16 @@ A machine learning web application that predicts Titanic passenger survival usin
 ├── train_model.py           # Script to train and save the model
 ├── test_request.py          # Example script to test the API
 ├── requirements.txt         # Python dependencies
-├── Dockerfile               # Multi-stage Docker build
-├── docker-compose.yml       # One-command Docker Compose setup
-├── start.sh                 # Build, run, and auto-open browser script
-├── .dockerignore            # Files excluded from Docker context
+├── Dockerfile               # Multi-stage Docker build (builder → runtime)
+├── docker-compose.yml       # Docker Compose orchestration
+├── start.sh                 # 🚀 One-click launcher (build + run + open browser)
+├── .dockerignore            # Files excluded from Docker build context
 └── README.md                # This file
 ```
 
 ---
 
-## 🚀 Quick Start (Local)
+## 🚀 Quick Start (Local — without Docker)
 
 ### 1. Install dependencies
 
@@ -63,42 +63,42 @@ python test_request.py
 
 ---
 
-## 🐳 Docker
+## 🐳 Docker (Recommended)
 
-The Dockerfile uses a **multi-stage build**: it trains the model in the first stage and creates a slim runtime image in the second. The container includes a **health check** and **Docker Desktop labels** so it shows an "Open in browser" button automatically.
+The project uses a **multi-stage Docker build** that trains the model in the first stage and creates a slim, secure runtime image (with a non-root user) in the second.
 
-### Option A — Start script (recommended)
+### ⚡ One-Click Start (recommended)
 
-Builds the image, starts the container, and **opens your browser automatically**:
+Just run:
 
 ```bash
 ./start.sh
 ```
 
-### Option B — Docker Compose
+This single command will:
+1. ✅ Verify Docker is installed and running
+2. 🛑 Stop any previous container
+3. 🔨 Build the Docker image (with model training)
+4. 🚀 Start the container
+5. ⏳ Wait for the health check to pass
+6. 🌐 Open your browser automatically
+
+### Manual: Docker Compose
 
 ```bash
-docker compose up --build
+docker compose up --build -d     # Build & start in background
+docker compose logs -f           # View live logs
+docker compose down              # Stop the container
 ```
 
-Then open **http://localhost:8000**, or click **"Open in browser"** in Docker Desktop.
-
-### Option C — Docker CLI
+### Manual: Docker CLI
 
 ```bash
 docker build -t titanic-fastapi .
 docker run -d -p 8000:8000 --name titanic-app titanic-fastapi
 ```
 
-Open **http://localhost:8000** to use the app.
-
-### Stop the container
-
-```bash
-docker compose down        # if started with Compose / start.sh
-# or
-docker stop titanic-app    # if started with docker run
-```
+Then open **http://localhost:8000** to use the app.
 
 ---
 

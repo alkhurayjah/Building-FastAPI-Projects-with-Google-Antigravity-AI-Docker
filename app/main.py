@@ -74,7 +74,7 @@ class PassengerInput(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """Render the main prediction form page."""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
 
 # ── POST /predict — Run the model and return prediction ─────────────

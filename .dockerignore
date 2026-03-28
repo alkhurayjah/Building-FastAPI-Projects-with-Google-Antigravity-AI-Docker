@@ -1,28 +1,47 @@
-# Git
+# ─────────────────────────────────────────────────
+# .dockerignore — Exclude unnecessary files from
+# the Docker build context for faster builds
+# ─────────────────────────────────────────────────
+
+# Version control
 .git
 .gitignore
 
-# Python caches
-__pycache__
+# Python bytecode & caches
+__pycache__/
 *.pyc
 *.pyo
-
-# Jupyter
-.ipynb_checkpoints
-*.ipynb
-
-# IDE
-.vscode
-.idea
+*.pyd
+.Python
 
 # Virtual environments
-venv
-.venv
-env
+venv/
+.venv/
+env/
+.env/
 
-# OS files
+# Jupyter notebooks & checkpoints
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE & editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS-generated files
 .DS_Store
 Thumbs.db
 
 # Model artifacts (rebuilt during Docker build)
 model/
+
+# Documentation (not needed in image)
+README.md
+LICENSE
+
+# Docker files (not needed inside the image)
+Dockerfile
+docker-compose.yml
+start.sh
